@@ -34,39 +34,40 @@ jobs:
           exit 1
         fi
 
-    - name: "[RMVL] 检出 rmvl 仓库"
+    - name: "[RMVL] Checkout rmvl repository"
       uses: actions/checkout@v6
 
-    - name: "[RMVL] 安装构建与文档生成依赖"
+    - name: "[RMVL] Install dependencies"
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake ninja-build libeigen3-dev libopencv-dev libssl-dev python3-dev pybind11-dev python3-bs4 graphviz perl texlive-binaries
 
-    - name: "[RMVL] 安装 Doxygen"
+    - name: "[RMVL] Install Doxygen"
       working-directory: ${{ runner.temp }}
       run: |
         curl --fail --location --retry 3 https://www.doxygen.nl/files/doxygen-1.18.0.linux.bin.tar.gz -o doxygen-1.18.0.linux.bin.tar.gz
         echo '14fa81bdc34171edb5f1f02b1d60e74802f0439b77fa44e592565d517d72df90  doxygen-1.18.0.linux.bin.tar.gz' | sha256sum --check
         tar -xzf doxygen-1.18.0.linux.bin.tar.gz
         sudo install -m 755 doxygen-1.18.0/bin/doxygen /usr/local/bin/doxygen
-        doxygen --version
-        test "$(doxygen --version)" = '1.18.0'
+        doxygen_version="$(doxygen --version)"
+        printf '%s\n' "$doxygen_version"
+        test "${doxygen_version%% *}" = '1.18.0'
 
-    - name: "[RDT] 检出 rdt 仓库"
+    - name: "[RDT] Checkout rdt repository"
       uses: actions/checkout@v6
       with:
         repository: cv-rmvl/rmvl-dev-tools
         path: rmvl-dev-tools
         persist-credentials: false
 
-    - name: "[RDT] 构建并安装 rmvl/rdt"
+    - name: "[RDT] Build and install rmvl/rdt"
       run: |
         bash "$GITHUB_WORKSPACE/rmvl-dev-tools/setup/bash/install.bash" "$GITHUB_WORKSPACE"
         echo "RMVL_ROOT_=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
         echo "$GITHUB_WORKSPACE/rmvl-dev-tools/scripts/bash" >> "$GITHUB_PATH"
         sudo ldconfig
 
-    - name: "[RDT] 构建并发布文档"
+    - name: "[RDT] Build and publish documentation"
       env:
         DOC_FOLDER: ${{ inputs.folder }}
         DOCS_TOKEN: ${{ secrets.DOCS_TOKEN }}
