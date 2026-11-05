@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       folder:
-        description: Documentation folder under cv-rmvl.github.io/docs, for example 2.x
+        description: documents folder under cv-rmvl.github.io/docs, for example 2.x
         required: true
         type: string
     secrets:
@@ -15,17 +15,17 @@ on:
 permissions:
   contents: read
 
-# rdt pushes directly to the documentation repository's master branch.
+# rdt pushes directly to the documents repository's master branch.
 concurrency:
-  group: rmvl-documentation
+  group: rmvl-documents
   cancel-in-progress: false
 
 jobs:
   build_docs:
-    name: 文档构建与发布
+    name: Documents build and publish
     runs-on: ubuntu-24.04
     steps:
-    - name: "[RMVL] Validate documentation folder"
+    - name: "[RMVL] Validate documents folder"
       env:
         DOC_FOLDER: ${{ inputs.folder }}
       run: |
@@ -60,14 +60,22 @@ jobs:
         path: rmvl-dev-tools
         persist-credentials: false
 
-    - name: "[RDT] Build and install rmvl/rdt"
+    - name: "[RMVL] Configure RMVL"
+      working-directory: ${{ github.workspace }}
+      run: |
+        # install.bash reuses this directory relative to its working directory.
+        cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/.rmvltmp/rmvl/build" \
+          -DCMAKE_BUILD_TYPE=Release -DBUILD_EXTRA=ON -DBUILD_OPEN62541=ON
+
+    - name: "[RDT] Build and install RMVL and Dev Tools"
+      working-directory: ${{ github.workspace }}
       run: |
         bash "$GITHUB_WORKSPACE/rmvl-dev-tools/setup/bash/install.bash" "$GITHUB_WORKSPACE"
+        sudo ldconfig
         echo "RMVL_ROOT_=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
         echo "$GITHUB_WORKSPACE/rmvl-dev-tools/scripts/bash" >> "$GITHUB_PATH"
-        sudo ldconfig
 
-    - name: "[RDT] Build and publish documentation"
+    - name: "[RDT] Build and publish documents"
       env:
         DOC_FOLDER: ${{ inputs.folder }}
         DOCS_TOKEN: ${{ secrets.DOCS_TOKEN }}
