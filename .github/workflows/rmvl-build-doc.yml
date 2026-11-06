@@ -34,13 +34,28 @@ jobs:
           exit 1
         fi
 
-    - name: "[RMVL] Checkout rmvl repository"
-      uses: actions/checkout@v6
-
     - name: "[RMVL] Install dependencies"
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build libeigen3-dev libopencv-dev libssl-dev python3-dev pybind11-dev python3-bs4 graphviz perl texlive-binaries
+        sudo apt-get install -y libeigen3-dev libopencv-dev libssl-dev python3-dev pybind11-dev python3-bs4 graphviz perl texlive-binaries
+
+    - name: "[open62541] Checkout open62541 repository"
+      uses: actions/checkout@v6
+      with:
+        repository: open62541/open62541
+        ref: v1.5.4
+        path: open62541
+        persist-credentials: false
+
+    - name: "[open62541] Build and install open62541"
+      run: |
+        cmake -S "$GITHUB_WORKSPACE/open62541" -B "$RUNNER_TEMP/open62541-build" -G Ninja -DCMAKE_BUILD_TYPE=Release -DUA_ENABLE_PUBSUB=ON
+        cmake --build "$RUNNER_TEMP/open62541-build" --parallel
+        sudo cmake --install "$RUNNER_TEMP/open62541-build"
+        sudo ldconfig
+
+    - name: "[RMVL] Checkout rmvl repository"
+      uses: actions/checkout@v6
 
     - name: "[RMVL] Install Doxygen"
       working-directory: ${{ runner.temp }}
@@ -59,13 +74,6 @@ jobs:
         repository: cv-rmvl/rmvl-dev-tools
         path: rmvl-dev-tools
         persist-credentials: false
-
-    - name: "[RMVL] Configure RMVL"
-      working-directory: ${{ github.workspace }}
-      run: |
-        # install.bash reuses this directory relative to its working directory.
-        cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/.rmvltmp/rmvl/build" \
-          -DCMAKE_BUILD_TYPE=Release -DBUILD_EXTRA=ON -DBUILD_OPEN62541=ON
 
     - name: "[RDT] Build and install RMVL and Dev Tools"
       working-directory: ${{ github.workspace }}
