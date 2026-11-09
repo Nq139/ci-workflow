@@ -23,6 +23,7 @@ class LpssAdapter(Enum):
     MSG_STRSUB = "lpss.msg.strsub"
     MSG_TESTPUB = "lpss.msg.testpub"
     MSG_TESTSUB = "lpss.msg.testsub"
+    RSD2_ACCEPTANCE = "lpss.rsd2.acceptance"
     SRV_CLIENT = "lpss.srv.client"
     SRV_SERVICE = "lpss.srv.service"
     SRV_TESTCLIENT = "lpss.srv.testclient"

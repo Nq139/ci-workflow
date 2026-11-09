@@ -339,6 +339,7 @@ lpss_stop:
         - msg.strsub
         - msg.testpub
         - msg.testsub
+        - rsd2.acceptance
         - srv.client
         - srv.service
         - srv.testclient
@@ -370,4 +371,15 @@ lpss_node_check:
     - name: 是否存在
       type: bool
     - name: 域 ID
+      type: int
+
+
+lpss_rsd2_acceptance:
+  name: RSD2 双节点端点生命周期验证
+  info: 由 KDT 启动两个独立 Node，逐轮检查指定次数的端点上线和下线，并验证双向消息通信
+  component: func.lpss.rsd2.acceptance
+  args:
+    - name: 节点模式
+      type: str
+    - name: 测试轮数
       type: int

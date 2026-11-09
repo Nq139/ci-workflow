@@ -1,0 +1,3 @@
+info: RSD2 本机双进程端点生命周期验收
+cases:
+  - case: lpss.rsd2_lifecycle

@@ -1,0 +1,14 @@
+info:
+  name: 【RSD2】本机双进程端点上下线 200 次
+  input: 同机启动两个独立 Node 进程，同步及异步模式各执行 200 轮
+  expected: 双方逐轮观察到端点上线和下线，并能双向收发消息
+steps:
+  - name: lpss_rsd2_acceptance
+    args:
+      - sync
+      - 200
+  - name: lpss_rsd2_acceptance
+    dep: true
+    args:
+      - async
+      - 200
